@@ -1,0 +1,38 @@
+name: Update LanguageTool Version
+
+on:
+  schedule:
+    - cron: '00 22 * * *'
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Setup Maven
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'adopt'
+          java-version: '20'
+
+      - name: Update LanguageTool Dependencies with Maven
+        run: |
+          git config --global user.name 'GitHub Action'
+          git config --global user.email 'action@github.com'
+          mvn versions:use-latest-versions -Dincludes=org.languagetool:languagetool-core,org.languagetool:language-ca
+          git diff --exit-code || (echo "Changes detected" && git add pom.xml && git commit -m "Update LanguageTool dependencies with Maven" && echo "CHANGED=true" >> $GITHUB_ENV)
+
+      - name: Update Project Version and Push Changes
+        if: env.CHANGED == 'true'
+        run: |
+          LATEST_VERSION=$(awk -F'[><]' '/<artifactId>languagetool-core<\/artifactId>/{getline; print $3}' pom.xml)
+          sed -i '0,/<version>/{s|<version>.*</version>|<version>'"$LATEST_VERSION"'</version>|}' pom.xml
+          git add pom.xml
+          git commit -m "Update project version to $LATEST_VERSION"
+          git push
+          git tag $LATEST_VERSION
+          git push --tags
