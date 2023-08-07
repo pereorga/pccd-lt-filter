@@ -7,6 +7,17 @@
     <packaging>jar</packaging>
     <name>lt-filter</name>
     <url>https://pccd.dites.cat</url>
+    <repositories>
+        <repository>
+            <id>languagetool</id>
+            <name>LanguageTool Repository</name>
+            <url>https://repo.languagetool.org/artifactory/languagetool-os-release/</url>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </snapshots>
+        </repository>
+    </repositories>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -16,12 +27,12 @@
         <dependency>
             <groupId>org.languagetool</groupId>
             <artifactId>languagetool-core</artifactId>
-            <version>6.1</version>
+            <version>6.2.10</version>
         </dependency>
         <dependency>
             <groupId>org.languagetool</groupId>
             <artifactId>language-ca</artifactId>
-            <version>6.1</version>
+            <version>6.2.10</version>
         </dependency>
     </dependencies>
     <build>
