@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>pccd</groupId>
     <artifactId>lt-filter</artifactId>
-    <version>6.3.9-1</version>
+    <version>6.3.9-2</version>
     <packaging>jar</packaging>
     <name>lt-filter</name>
     <url>https://pccd.dites.cat</url>
