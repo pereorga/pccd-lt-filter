@@ -38,7 +38,10 @@ public class ltfilter {
             "EXIGEIX_US" ,
             "SER_ESSER",
             "WHITESPACE_RULE",
-            "CA_SIMPLEREPLACE_DIACRITICS_IEC"
+            "CA_UNPAIRED_BRACKETS",
+            "ESPAIS_SOBRANTS",
+            "MAJ_DESPRES_INTERROGANT",
+            "UPPERCASE_SENTENCE_START"
         ));
 
         try (BufferedReader br = new BufferedReader(new FileReader(inputFilename))) {
