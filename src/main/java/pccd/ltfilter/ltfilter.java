@@ -35,7 +35,7 @@ public class ltfilter {
             "EVITA_PRONOMS_VALENCIANS",
             "EVITA_DEMOSTRATIUS_EIXE",
             "VOCABULARI_VALENCIA",
-            "EXIGEIX_US" ,
+            "EXIGEIX_US",
             "SER_ESSER",
             "WHITESPACE_RULE",
             "CA_UNPAIRED_BRACKETS",
