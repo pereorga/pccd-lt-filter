@@ -27,12 +27,12 @@
         <dependency>
             <groupId>org.languagetool</groupId>
             <artifactId>languagetool-core</artifactId>
-            <version>6.5.4</version>
+            <version>6.5.5</version>
         </dependency>
         <dependency>
             <groupId>org.languagetool</groupId>
             <artifactId>language-ca</artifactId>
-            <version>6.5.4</version>
+            <version>6.5.5</version>
         </dependency>
     </dependencies>
     <build>
