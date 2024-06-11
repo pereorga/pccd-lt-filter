@@ -21,7 +21,7 @@ public class ltfilter {
 
     // Create an empty list and map with the required types
     static List<String> userList = new ArrayList<>();
-    static Map<String, Integer> userMap = new HashMap<>();
+    static Map<String, Object[]> userMap = new HashMap<>();
 
     static UserConfig userConfig = new UserConfig(userList, userMap);
     private static JLanguageTool langTool = new JLanguageTool(new Catalan(), cache, userConfig);
