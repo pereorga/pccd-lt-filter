@@ -5,8 +5,6 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import org.languagetool.JLanguageTool;
 import org.languagetool.ResultCache;
@@ -19,11 +17,7 @@ public class ltfilter {
 
     static ResultCache cache = null;
 
-    // Create an empty list and map with the required types
-    static List<String> userList = new ArrayList<>();
-    static Map<String, Object[]> userMap = new HashMap<>();
-
-    static UserConfig userConfig = new UserConfig(userList, userMap);
+    static UserConfig userConfig = new UserConfig(new ArrayList<String>(), new HashMap<String, Integer>());
     private static JLanguageTool langTool = new JLanguageTool(new Catalan(), cache, userConfig);
 
     public static void main(String[] args) throws Exception {
