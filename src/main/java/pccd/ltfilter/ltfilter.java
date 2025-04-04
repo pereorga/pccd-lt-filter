@@ -7,29 +7,25 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.languagetool.JLanguageTool;
 import org.languagetool.ResultCache;
 import org.languagetool.UserConfig;
-import org.languagetool.language.Catalan;
+import org.languagetool.Languages;
 
 public class ltfilter {
-    public ltfilter() {
-    }
-
-    static ResultCache cache = null;
-    static List<String> userList = new ArrayList<>();
-    static Map<String, Object[]> userMap = new HashMap<>();
-    static UserConfig userConfig = new UserConfig(userList, userMap);
-    private static JLanguageTool langTool = new JLanguageTool(new Catalan(), cache, userConfig);
 
     public static void main(String[] args) throws Exception {
-
         if (args.length != 1) {
             System.err.println("Usage: java -jar target/lt-filter-0.0.1-jar-with-dependencies.jar FILE.txt > OUTPUT.txt 2> EXCLUDED.txt");
             System.exit(1);
         }
 
-        String inputFilename = args[0];
+        List<String> userList = new ArrayList<>();
+        Map<String, Object[]> userMap = new HashMap<>();
+        UserConfig userConfig = new UserConfig(userList, userMap);
+
+        JLanguageTool langTool = new JLanguageTool(Languages.getLanguageForShortCode("ca"));
 
         langTool.disableRules(Arrays.asList(
             "EXIGEIX_VERBS_CENTRAL",
@@ -47,6 +43,7 @@ public class ltfilter {
             "UPPERCASE_SENTENCE_START"
         ));
 
+        String inputFilename = args[0];
         try (BufferedReader br = new BufferedReader(new FileReader(inputFilename))) {
             String line;
             line = br.readLine();
