@@ -1,12 +1,12 @@
-name: Build on Multiple JDKs
+name: Build and Test on Multiple JDKs
 
 on:
   push:
   pull_request:
 
 jobs:
-  build:
-    name: Build with Java ${{ matrix.java }}
+  build-and-test:
+    name: Test with Java ${{ matrix.java }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -24,3 +24,13 @@ jobs:
 
     - name: Build with Maven
       run: mvn package
+
+    - name: Run the JAR with sample input
+      run: |
+        java -jar target/lt-filter-6.4-jar-with-dependencies.jar testdata/frases.txt > ok.txt 2> excluded.txt
+
+    - name: Compare sentences with expected output
+      run: diff ok.txt testdata/expected_ok.txt
+
+    - name: Compare excluded sentences with expected output
+      run: diff excluded.txt testdata/expected_excluded.txt
