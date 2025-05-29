@@ -1,38 +1,26 @@
-name: Update LanguageTool Version
+name: Build on Multiple JDKs
 
 on:
-  schedule:
-    - cron: '00 22 * * *'
-  workflow_dispatch:
+  push:
+  pull_request:
 
 jobs:
-  update:
+  build:
+    name: Build with Java ${{ matrix.java }}
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java: [17, 21]
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Setup Maven
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'adopt'
-          java-version: '20'
+    - name: Set up JDK ${{ matrix.java }}
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: ${{ matrix.java }}
 
-      - name: Update LanguageTool Dependencies with Maven
-        run: |
-          git config --global user.name 'GitHub Action'
-          git config --global user.email 'action@github.com'
-          mvn versions:use-latest-versions -Dincludes=org.languagetool:languagetool-core,org.languagetool:language-ca
-          git diff --exit-code || (echo "Changes detected" && git add pom.xml && git commit -m "Update LanguageTool dependencies with Maven" && echo "CHANGED=true" >> $GITHUB_ENV)
-
-      - name: Update Project Version and Push Changes
-        if: env.CHANGED == 'true'
-        run: |
-          LATEST_VERSION=$(awk -F'[><]' '/<artifactId>languagetool-core<\/artifactId>/{getline; print $3}' pom.xml)
-          sed -i '0,/<version>/{s|<version>.*</version>|<version>'"$LATEST_VERSION"'</version>|}' pom.xml
-          git add pom.xml
-          git commit -m "Update project version to $LATEST_VERSION"
-          git push
-          git tag $LATEST_VERSION
-          git push --tags
+    - name: Build with Maven
+      run: mvn package
