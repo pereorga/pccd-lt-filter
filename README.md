@@ -11,7 +11,7 @@ mvn package
 ## Ús
 
 ```
-java -jar target/lt-filter-6.4-jar-with-dependencies.jar frases.txt > ok.txt 2> excluded.txt
+java -jar target/lt-filter-jar-with-dependencies.jar frases.txt > ok.txt 2> excluded.txt
 ```
 
 ## Crèdits

@@ -17,7 +17,7 @@ public class ltfilter {
 
     public static void main(String[] args) throws Exception {
         if (args.length != 1) {
-            System.err.println("Usage: java -jar target/lt-filter-0.0.1-jar-with-dependencies.jar FILE.txt > OUTPUT.txt 2> EXCLUDED.txt");
+            System.err.println("Usage: java -jar target/lt-filter-jar-with-dependencies.jar FILE.txt > OUTPUT.txt 2> EXCLUDED.txt");
             System.exit(1);
         }
 

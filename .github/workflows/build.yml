@@ -27,7 +27,7 @@ jobs:
 
     - name: Run the JAR with sample input
       run: |
-        java -jar target/lt-filter-6.4-jar-with-dependencies.jar testdata/frases.txt > ok.txt 2> excluded.txt
+        java -jar target/lt-filter-jar-with-dependencies.jar testdata/frases.txt > ok.txt 2> excluded.txt
 
     - name: Compare sentences with expected output
       run: diff ok.txt testdata/expected_ok.txt
