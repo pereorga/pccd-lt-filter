@@ -9,8 +9,7 @@
     <url>https://pccd.dites.cat</url>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.release>8</maven.compiler.release>
     </properties>
     <dependencies>
         <dependency>
@@ -23,6 +22,11 @@
             <artifactId>language-ca</artifactId>
             <version>6.6</version>
         </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>2.0.9</version>
+        </dependency>
     </dependencies>
     <build>
         <finalName>lt-filter</finalName>
@@ -32,8 +36,6 @@
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>3.4.2</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
@@ -54,8 +56,6 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
