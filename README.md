@@ -1,8 +1,8 @@
 # lt-filter
 
-Script simple per filtrar frases amb LanguageTool.
+Programa simple per filtrar frases amb LanguageTool.
 
-## Compilació
+## Compilació (requereix Maven i JDK 17+)
 
 ```
 mvn package
@@ -12,6 +12,16 @@ mvn package
 
 ```
 java -jar target/lt-filter-jar-with-dependencies.jar frases.txt > ok.txt 2> excluded.txt
+```
+
+## Instal·lació i ús amb NPM (requereix JRE 17+)
+
+```bash
+npm install @pccd/lt-filter
+```
+
+```bash
+npx lt-filter input.txt > ok.txt 2> excluded.txt
 ```
 
 ## Crèdits

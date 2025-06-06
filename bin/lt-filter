@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# lt-filter wrapper script
+
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+JAR_PATH="$SCRIPT_DIR/lt-filter.jar"
+
+# Check if Java is available
+if ! command -v java &> /dev/null; then
+    echo "Error: Java is not installed or not in PATH" >&2
+    echo "Please install Java 17+ (e.g., 'apt install openjdk-17-jre-headless')" >&2
+    exit 1
+fi
+
+# Check Java version (optional but helpful)
+JAVA_VERSION=$(java -version 2>&1 | head -n1 | cut -d'"' -f2 | cut -d'.' -f1)
+if [ "$JAVA_VERSION" -lt 17 ]; then
+    echo "Warning: Java 17+ recommended, found Java $JAVA_VERSION" >&2
+fi
+
+# Run the JAR with all passed arguments
+exec java -jar "$JAR_PATH" "$@"

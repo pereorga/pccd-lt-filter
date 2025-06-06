@@ -1,0 +1,28 @@
+{
+  "name": "@pccd/lt-filter",
+  "version": "6.6.0",
+  "description": "LanguageTool filter for Catalan text processing",
+  "main": "bin/lt-filter.jar",
+  "bin": {
+    "lt-filter": "bin/lt-filter"
+  },
+  "files": [
+    "bin/",
+    "README.md"
+  ],
+  "scripts": {
+    "postinstall": "echo 'lt-filter installed. Requires Java 17+ to run.'"
+  },
+  "keywords": [
+    "languagetool",
+    "catalan",
+    "text-processing"
+  ],
+  "author": "Pere Orga",
+  "license": "LGPL-2.1-or-later",
+  "homepage": "https://pccd.dites.cat",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pereorga/pccd-lt-filter.git"
+  }
+}
