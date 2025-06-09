@@ -1,27 +1,36 @@
 # lt-filter
 
-Programa simple per filtrar frases amb LanguageTool.
+Programa per filtrar frases en català amb LanguageTool.  Separa les frases correctes de les que contenen possibles errors gramaticals o ortogràfics.
 
-## Compilació (requereix Maven i JDK 17+)
-
-```
-mvn package
-```
-
-## Ús
-
-```
-java -jar target/lt-filter-jar-with-dependencies.jar frases.txt > ok.txt 2> excluded.txt
-```
-
-## Instal·lació i ús amb NPM (requereix JRE 17+)
+## Instal·lació i ús (requereix JRE 17+)
 
 ```bash
 npm install @pccd/lt-filter
 ```
 
 ```bash
-npx lt-filter input.txt > ok.txt 2> excluded.txt
+# Comportament per defecte
+npx lt-filter input.txt > correct.txt 2> flagged.txt
+
+# Només frases correctes
+npx lt-filter --correct input.txt > correct.txt
+
+# Només frases potencialment incorrectes
+npx lt-filter --flagged input.txt > flagged.txt
+```
+
+## Opcions de la línia d'ordres
+
+| Opció           | Descripció                                           |
+|-----------------|------------------------------------------------------|
+| `-c, --correct` | Envia les frases correctes a stdout                  |
+| `-f, --flagged` | Envia les frases marcades per LanguageTool a stdout  |
+| `-h, --help`    | Mostra el missatge d'ajuda                           |
+
+## Compilació (requereix Maven i JDK 17+)
+
+```bash
+mvn package
 ```
 
 ## Crèdits

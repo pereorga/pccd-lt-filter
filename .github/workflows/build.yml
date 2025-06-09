@@ -26,12 +26,26 @@ jobs:
     - name: Build with Maven
       run: mvn package
 
+    - name: Verify JAR was built
+      run: ls -la bin/lt-filter.jar
+
     - name: Run the JAR with sample input
       run: |
-        java -jar target/lt-filter-jar-with-dependencies.jar testdata/frases.txt > ok.txt 2> excluded.txt
+        java -jar bin/lt-filter.jar testdata/input.txt > correct.txt 2> flagged.txt
 
     - name: Compare sentences with expected output
-      run: diff ok.txt testdata/expected_ok.txt
+      run: diff correct.txt testdata/correct.txt
 
     - name: Compare excluded sentences with expected output
-      run: diff excluded.txt testdata/expected_excluded.txt
+      run: diff flagged.txt testdata/flagged.txt
+
+    - name: Run the JAR with separate options
+      run: |
+        java -jar bin/lt-filter.jar --correct testdata/input.txt > correct-option.txt
+        java -jar bin/lt-filter.jar --flagged testdata/input.txt > flagged-option.txt
+
+    - name: Compare sentences with expected output (options test)
+      run: diff correct-option.txt testdata/correct.txt
+
+    - name: Compare excluded sentences with expected output (options test)
+      run: diff flagged-option.txt testdata/flagged.txt
