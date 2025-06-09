@@ -23,6 +23,9 @@ jobs:
         distribution: 'temurin'
         java-version: ${{ matrix.java }}
 
+    - name: Remove any existing JAR
+      run: rm -f bin/lt-filter.jar
+
     - name: Build with Maven
       run: mvn package
 
