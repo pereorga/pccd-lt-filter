@@ -4,9 +4,11 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.List;
-
+import java.util.Properties;
 import org.languagetool.JLanguageTool;
 import org.languagetool.Languages;
 
@@ -32,24 +34,44 @@ public class ltfilter {
     private static boolean outputCorrectSentences = false;
     private static boolean outputFlaggedSentences = false;
     private static boolean optionsProvided = false;
+    private static boolean exitAfterParsing = false;
+    private static boolean errorInArgs = false;
+
+    private static String getVersion() {
+        String path = "/META-INF/maven/pccd/lt-filter/pom.properties";
+        try (InputStream stream = ltfilter.class.getResourceAsStream(path)) {
+            if (stream != null) {
+                Properties props = new Properties();
+                props.load(stream);
+                return props.getProperty("version", "unknown");
+            }
+        } catch (IOException e) {
+            return "unknown";
+        }
+        return "unknown";
+    }
 
     public static void main(String[] args) {
         try {
             String inputFilename = parseArguments(args);
 
-            if (inputFilename == null) {
-                printUsage();
+            if (errorInArgs) {
                 System.exit(1);
             }
 
-            processFile(inputFilename);
+            // For --version and --help options
+            if (exitAfterParsing) {
+                System.exit(0);
+            }
 
+            if (inputFilename == null || inputFilename.equals("-")) {
+                processStdin();
+            } else {
+                processFile(inputFilename);
+            }
         } catch (IOException e) {
-            System.err.println("Error reading file: " + e.getMessage());
+            System.err.println("Error: " + e.getMessage());
             System.exit(2);
-        } catch (RuntimeException e) {
-            System.err.println("Language processing error: " + e.getMessage());
-            System.exit(3);
         }
     }
 
@@ -61,7 +83,10 @@ public class ltfilter {
                 case "-c":
                 case "--correct":
                     if (outputFlaggedSentences) {
-                        System.err.println("Error: Cannot use both --correct and --flagged options together");
+                        System.err.println(
+                            "Error: Cannot use both --correct and --flagged options together."
+                        );
+                        errorInArgs = true;
                         return null;
                     }
                     outputCorrectSentences = true;
@@ -70,7 +95,10 @@ public class ltfilter {
                 case "-f":
                 case "--flagged":
                     if (outputCorrectSentences) {
-                        System.err.println("Error: Cannot use both --correct and --flagged options together");
+                        System.err.println(
+                            "Error: Cannot use both --correct and --flagged options together."
+                        );
+                        errorInArgs = true;
                         return null;
                     }
                     outputFlaggedSentences = true;
@@ -78,14 +106,26 @@ public class ltfilter {
                     break;
                 case "-h":
                 case "--help":
+                    printUsage();
+                    exitAfterParsing = true;
+                    return null;
+                case "-v":
+                case "--version":
+                    System.out.println("lt-filter version " + getVersion());
+                    exitAfterParsing = true;
                     return null;
                 default:
-                    if (args[i].startsWith("-")) {
+                    if (args[i].startsWith("-") && !args[i].equals("-")) {
                         System.err.println("Unknown option: " + args[i]);
+                        printUsage();
+                        errorInArgs = true;
                         return null;
                     } else {
                         if (inputFilename != null) {
-                            System.err.println("Error: Multiple input files specified");
+                            System.err.println(
+                                "Error: Multiple input sources specified. Only one is allowed."
+                            );
+                            errorInArgs = true;
                             return null;
                         }
                         inputFilename = args[i];
@@ -94,94 +134,91 @@ public class ltfilter {
             }
         }
 
-        if (inputFilename == null) {
-            System.err.println("Error: No input file specified");
-            return null;
-        }
-
         return inputFilename;
     }
 
     private static void printUsage() {
-        System.err.println("ltfilter - LanguageTool based sentence filter for Catalan text");
+        System.err.println("lt-filter - LanguageTool based sentence filter for Catalan text");
         System.err.println();
         System.err.println("USAGE:");
-        System.err.println("    ltfilter [OPTIONS] <input-file>");
+        System.err.println("    lt-filter [OPTIONS] [<input-file> | -]");
         System.err.println();
         System.err.println("ARGUMENTS:");
-        System.err.println("    <input-file>    Input text file to process");
+        System.err.println("    <input-file>   Input text file (one sentence per line).");
+        System.err.println(
+            "                   If no file is specified, reads from standard input."
+        );
+        System.err.println("    -              Explicitly read from standard input (stdin).");
         System.err.println();
         System.err.println("OPTIONS:");
-        System.err.println("    -c, --correct     Output correct sentences to stdout");
-        System.err.println("    -f, --flagged     Output flagged sentences to stdout");
-        System.err.println("    -h, --help        Show this help message");
+        System.err.println("    -c, --correct  Output correct sentences to stdout");
+        System.err.println("    -f, --flagged  Output flagged sentences to stdout");
+        System.err.println("    -h, --help     Show this help message");
+        System.err.println("    -v, --version  Show version information");
         System.err.println();
         System.err.println("DEFAULT BEHAVIOR:");
         System.err.println("    When no options are specified:");
         System.err.println("    - Correct sentences are sent to stdout");
         System.err.println("    - Flagged sentences are sent to stderr");
-        System.err.println();
-        System.err.println("    When options are specified:");
-        System.err.println("    - Only explicitly requested output is sent to stdout");
-        System.err.println();
-        System.err.println("EXAMPLES:");
-        System.err.println("    ltfilter input.txt > correct.txt 2> flagged.txt");
-        System.err.println("    ltfilter --correct input.txt > correct.txt");
-        System.err.println("    ltfilter --flagged input.txt > flagged.txt");
+    }
+
+    private static void processStdin() throws IOException {
+        JLanguageTool langTool = new JLanguageTool(
+            Languages.getLanguageForShortCode(DEFAULT_LANGUAGE)
+        );
+        langTool.disableRules(DISABLED_RULES);
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String trimmed = line.trim();
+                if (trimmed.isEmpty()) {
+                    continue;
+                }
+                boolean isCorrect = langTool.check(trimmed).isEmpty();
+                printResult(trimmed, isCorrect);
+            }
+        }
     }
 
     private static void processFile(String inputFilename) throws IOException {
-        // Input validation
         File inputFile = new File(inputFilename);
-        if (!inputFile.exists()) {
-            throw new IOException("File not found: " + inputFilename);
-        }
-        if (!inputFile.canRead()) {
-            throw new IOException("Cannot read file: " + inputFilename);
-        }
-        if (inputFile.isDirectory()) {
-            throw new IOException("Input is a directory, not a file: " + inputFilename);
+        if (!inputFile.exists() || !inputFile.canRead() || inputFile.isDirectory()) {
+            throw new IOException(
+                "File not found, is a directory, or cannot be read: " + inputFilename
+            );
         }
 
-        // Initialize LanguageTool once
-        JLanguageTool languageTool = null;
-        languageTool = new JLanguageTool(Languages.getLanguageForShortCode(DEFAULT_LANGUAGE));
-        languageTool.disableRules(DISABLED_RULES);
+        JLanguageTool langTool = new JLanguageTool(
+            Languages.getLanguageForShortCode(DEFAULT_LANGUAGE)
+        );
+        langTool.disableRules(DISABLED_RULES);
 
-        // Process file
-        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(inputFile))) {
-            String currentLine;
-            while ((currentLine = bufferedReader.readLine()) != null) {
-                String trimmedSentence = currentLine.trim();
-
-                if (trimmedSentence.isEmpty()) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(inputFile))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String trimmed = line.trim();
+                if (trimmed.isEmpty()) {
                     continue;
                 }
+                boolean isCorrect = langTool.check(trimmed).isEmpty();
+                printResult(trimmed, isCorrect);
+            }
+        }
+    }
 
-                boolean isCorrectSentence;
-                try {
-                    isCorrectSentence = languageTool.check(trimmedSentence).isEmpty();
-                } catch (Exception e) {
-                    // If sentence checking fails, treat as flagged
-                    System.err.println("Warning: Failed to check sentence, treating as flagged: " + e.getMessage());
-                    isCorrectSentence = false;
-                }
-
-                if (optionsProvided) {
-                    // When options are provided, only output what was explicitly requested
-                    if (isCorrectSentence && outputCorrectSentences) {
-                        System.out.println(trimmedSentence);
-                    } else if (!isCorrectSentence && outputFlaggedSentences) {
-                        System.out.println(trimmedSentence);
-                    }
-                } else {
-                    // Default behavior: correct to stdout, flagged to stderr
-                    if (isCorrectSentence) {
-                        System.out.println(trimmedSentence);
-                    } else {
-                        System.err.println(trimmedSentence);
-                    }
-                }
+    private static void printResult(String line, boolean isCorrect) {
+        if (optionsProvided) {
+            if (isCorrect && outputCorrectSentences) {
+                System.out.println(line);
+            } else if (!isCorrect && outputFlaggedSentences) {
+                System.out.println(line);
+            }
+        } else {
+            if (isCorrect) {
+                System.out.println(line);
+            } else {
+                System.err.println(line);
             }
         }
     }

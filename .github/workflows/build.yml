@@ -2,7 +2,7 @@ name: Build and Test on Multiple JDKs
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
 
 jobs:
@@ -14,41 +14,77 @@ jobs:
         java: [17, 21]
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up JDK ${{ matrix.java }}
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: ${{ matrix.java }}
+      - name: Set up JDK ${{ matrix.java }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: ${{ matrix.java }}
 
-    - name: Remove any existing JAR
-      run: rm -f bin/lt-filter.jar
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
 
-    - name: Build with Maven
-      run: mvn package
+      - name: Install npm dependencies
+        run: npm ci
 
-    - name: Verify JAR was built
-      run: ls -la bin/lt-filter.jar
+      - name: Run linter
+        run: npm run lint
 
-    - name: Run the JAR with sample input
-      run: |
-        java -jar bin/lt-filter.jar testdata/input.txt > correct.txt 2> flagged.txt
+      - name: Remove any existing JAR
+        run: rm -f bin/lt-filter.jar
 
-    - name: Compare sentences with expected output
-      run: diff correct.txt testdata/correct.txt
+      - name: Build with Maven
+        run: mvn package
 
-    - name: Compare excluded sentences with expected output
-      run: diff flagged.txt testdata/flagged.txt
+      - name: Verify JAR was built
+        run: ls -la bin/lt-filter.jar
 
-    - name: Run the JAR with separate options
-      run: |
-        java -jar bin/lt-filter.jar --correct testdata/input.txt > correct-option.txt
-        java -jar bin/lt-filter.jar --flagged testdata/input.txt > flagged-option.txt
+      - name: Run the JAR with sample input
+        run: java -jar bin/lt-filter.jar testdata/input.txt > correct.txt 2> flagged.txt
 
-    - name: Compare sentences with expected output (options test)
-      run: diff correct-option.txt testdata/correct.txt
+      - name: Compare sentences with expected output
+        run: diff correct.txt testdata/correct.txt
 
-    - name: Compare excluded sentences with expected output (options test)
-      run: diff flagged-option.txt testdata/flagged.txt
+      - name: Compare excluded sentences with expected output
+        run: diff flagged.txt testdata/flagged.txt
+
+      - name: Run the JAR with separate options
+        run: |
+          java -jar bin/lt-filter.jar --correct testdata/input.txt > correct-option.txt
+          java -jar bin/lt-filter.jar --flagged testdata/input.txt > flagged-option.txt
+
+      - name: Compare sentences with expected output (options test)
+        run: diff correct-option.txt testdata/correct.txt
+
+      - name: Compare excluded sentences with expected output (options test)
+        run: diff flagged-option.txt testdata/flagged.txt
+
+      - name: Run the JAR with sample input (stdin)
+        run: cat testdata/input.txt | java -jar bin/lt-filter.jar > stdin-correct.txt 2> stdin-flagged.txt
+
+      - name: Compare sentences with expected output (stdin)
+        run: diff stdin-correct.txt testdata/correct.txt
+
+      - name: Compare excluded sentences with expected output (stdin)
+        run: diff stdin-flagged.txt testdata/flagged.txt
+
+      - name: Run the JAR with separate options (stdin)
+        run: |
+          cat testdata/input.txt | java -jar bin/lt-filter.jar --correct > stdin-correct-option.txt
+          cat testdata/input.txt | java -jar bin/lt-filter.jar --flagged > stdin-flagged-option.txt
+
+      - name: Compare sentences with expected output (options test, stdin)
+        run: diff stdin-correct-option.txt testdata/correct.txt
+
+      - name: Compare excluded sentences with expected output (options test, stdin)
+        run: diff stdin-flagged-option.txt testdata/flagged.txt
+
+      - name: Run help option via Node.js wrapper
+        run: node bin/lt-filter.js --help
+
+      - name: Run version option via Node.js wrapper
+        run: node bin/lt-filter.js -v

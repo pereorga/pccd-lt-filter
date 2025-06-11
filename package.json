@@ -11,6 +11,8 @@
     "README.md"
   ],
   "scripts": {
+    "fix": "prettier --write .",
+    "lint": "prettier --check .",
     "postinstall": "echo 'lt-filter installed. Requires Java 17+ to run.'"
   },
   "keywords": [
@@ -24,5 +26,9 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/pereorga/pccd-lt-filter.git"
+  },
+  "devDependencies": {
+    "prettier": "3.5.3",
+    "prettier-plugin-java": "2.6.8"
   }
 }
