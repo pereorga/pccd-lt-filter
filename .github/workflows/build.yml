@@ -97,3 +97,15 @@ jobs:
           java -jar bin/lt-filter.jar --disable-rules-replace SER_ESSER testdata/input.txt > disable-rules-replace-test.txt 2>&1
           echo "Testing help shows new options"
           java -jar bin/lt-filter.jar --help | grep -q "disable-rules"
+
+      - name: Test rule-names functionality
+        run: |
+          echo "Testing --rule-names with flagged sentences"
+          java -jar bin/lt-filter.jar --flagged --rule-names testdata/flagged.txt > rule-names-test.txt
+          echo "Verify rule names are included in output"
+          grep -q "\[.*\]" rule-names-test.txt
+          echo "Testing --rule-names help shows the option"
+          java -jar bin/lt-filter.jar --help | grep -q "rule-names"
+          echo "Testing --rule-names via Node.js wrapper"
+          node bin/lt-filter.js --flagged --rule-names testdata/flagged.txt > rule-names-node-test.txt
+          grep -q "\[.*\]" rule-names-node-test.txt

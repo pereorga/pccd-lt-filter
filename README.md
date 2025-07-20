@@ -21,6 +21,9 @@ npx lt-filter --correct input.txt > correct.txt
 # Només frases potencialment incorrectes
 npx lt-filter --flagged input.txt > flagged.txt
 
+# Inclou els noms de les regles després de les frases marcades
+npx lt-filter --flagged --rule-names input.txt
+
 # Desactiva regles addicionals (s'afegeixen a les regles per defecte)
 npx lt-filter --disable-rules REGLA1,REGLA2 input.txt
 
@@ -41,10 +44,23 @@ java -jar lt-filter.jar --help
 | ------------------------------- | ------------------------------------------------------------------ |
 | `-c, --correct`                 | Envia les frases correctes a stdout                                |
 | `-f, --flagged`                 | Envia les frases marcades per LanguageTool a stdout                |
+| `-r, --rule-names`              | Inclou els noms de les regles després de les frases marcades       |
 | `-d, --disable-rules RULES`     | Llista de regles addicionals a desactivar (separades per comes)    |
 | `--disable-rules-replace RULES` | Llista de regles a desactivar (substitueix les regles per defecte) |
 | `-h, --help`                    | Mostra el missatge d'ajuda                                         |
 | `-v, --version`                 | Mostra la versió                                                   |
+
+## Exemple de sortida amb noms de regles
+
+Quan s'utilitza l'opció `--rule-names`, els noms de les regles que han detectat errors apareixen entre claudàtors després de la frase:
+
+```bash
+$ echo "A acaba-set" | npx lt-filter --flagged --rule-names
+A acaba-set [PREP_VERB_CONJUGAT]
+
+$ echo "A aferrapilla" | npx lt-filter --flagged --rule-names
+A aferrapilla [MORFOLOGIK_RULE_CA_ES]
+```
 
 ## Regles desactivades per defecte
 

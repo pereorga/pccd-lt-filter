@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Properties;
 import org.languagetool.JLanguageTool;
 import org.languagetool.Languages;
+import org.languagetool.rules.RuleMatch;
 
 public class ltfilter {
 
@@ -39,6 +40,7 @@ public class ltfilter {
     private static boolean errorInArgs = false;
     private static List<String> disabledRules = new ArrayList<>();
     private static boolean appendToDefaultRules = true;
+    private static boolean outputRuleNames = false;
 
     private static String getVersion() {
         String path = "/META-INF/maven/pccd/lt-filter/pom.properties";
@@ -147,6 +149,10 @@ public class ltfilter {
                         disabledRules.add(rule.trim());
                     }
                     break;
+                case "-r":
+                case "--rule-names":
+                    outputRuleNames = true;
+                    break;
                 default:
                     if (args[i].startsWith("-") && !args[i].equals("-")) {
                         System.err.println("Unknown option: " + args[i]);
@@ -194,6 +200,9 @@ public class ltfilter {
             "    --disable-rules-replace RULES  Comma-separated list of rules to disable"
         );
         System.err.println("                               (replaces default disabled rules)");
+        System.err.println(
+            "    -r, --rule-names           Include rule names after flagged sentences"
+        );
         System.err.println("    -h, --help                 Show this help message");
         System.err.println("    -v, --version              Show version information");
         System.err.println();
@@ -215,8 +224,9 @@ public class ltfilter {
                 if (line.trim().isEmpty()) {
                     continue;
                 }
-                boolean isCorrect = langTool.check(line).isEmpty();
-                printResult(line, isCorrect);
+                List<RuleMatch> matches = langTool.check(line);
+                boolean isCorrect = matches.isEmpty();
+                printResult(line, isCorrect, matches);
                 line = reader.readLine();
             }
         }
@@ -241,26 +251,46 @@ public class ltfilter {
                 if (line.trim().isEmpty()) {
                     continue;
                 }
-                boolean isCorrect = langTool.check(line).isEmpty();
-                printResult(line, isCorrect);
+                List<RuleMatch> matches = langTool.check(line);
+                boolean isCorrect = matches.isEmpty();
+                printResult(line, isCorrect, matches);
                 line = reader.readLine();
             }
         }
     }
 
-    private static void printResult(String line, boolean isCorrect) {
+    private static void printResult(String line, boolean isCorrect, List<RuleMatch> matches) {
         if (optionsProvided) {
             if (isCorrect && outputCorrectSentences) {
                 System.out.println(line);
             } else if (!isCorrect && outputFlaggedSentences) {
-                System.out.println(line);
+                printLineWithRules(line, matches, System.out);
             }
         } else {
             if (isCorrect) {
                 System.out.println(line);
             } else {
-                System.err.println(line);
+                printLineWithRules(line, matches, System.err);
             }
+        }
+    }
+
+    private static void printLineWithRules(
+        String line,
+        List<RuleMatch> matches,
+        java.io.PrintStream out
+    ) {
+        if (outputRuleNames && !matches.isEmpty()) {
+            StringBuilder ruleNames = new StringBuilder();
+            for (int i = 0; i < matches.size(); i++) {
+                if (i > 0) {
+                    ruleNames.append(", ");
+                }
+                ruleNames.append(matches.get(i).getRule().getId());
+            }
+            out.println(line + " [" + ruleNames.toString() + "]");
+        } else {
+            out.println(line);
         }
     }
 
