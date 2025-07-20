@@ -88,3 +88,12 @@ jobs:
 
       - name: Run version option via Node.js wrapper
         run: node bin/lt-filter.js -v
+
+      - name: Test disable-rules functionality
+        run: |
+          echo "Testing --disable-rules (append mode)"
+          java -jar bin/lt-filter.jar --disable-rules COMMA_PARENTHESIS_WHITESPACE testdata/input.txt > disable-rules-test.txt 2>&1
+          echo "Testing --disable-rules-replace (replace mode)"
+          java -jar bin/lt-filter.jar --disable-rules-replace SER_ESSER testdata/input.txt > disable-rules-replace-test.txt 2>&1
+          echo "Testing help shows new options"
+          java -jar bin/lt-filter.jar --help | grep -q "disable-rules"

@@ -20,6 +20,12 @@ npx lt-filter --correct input.txt > correct.txt
 
 # Només frases potencialment incorrectes
 npx lt-filter --flagged input.txt > flagged.txt
+
+# Desactiva regles addicionals (s'afegeixen a les regles per defecte)
+npx lt-filter --disable-rules REGLA1,REGLA2 input.txt
+
+# Substitueix completament les regles per defecte
+npx lt-filter --disable-rules-replace SER_ESSER input.txt
 ```
 
 Si no, es pot baixar directament el [fitxer JAR](bin/lt-filter.jar):
@@ -31,12 +37,32 @@ java -jar lt-filter.jar --help
 
 ## Opcions de la línia d'ordres
 
-| Opció           | Descripció                                          |
-| --------------- | --------------------------------------------------- |
-| `-c, --correct` | Envia les frases correctes a stdout                 |
-| `-f, --flagged` | Envia les frases marcades per LanguageTool a stdout |
-| `-h, --help`    | Mostra el missatge d'ajuda                          |
-| `-v, --version` | Mostra la versió                                    |
+| Opció                           | Descripció                                                         |
+| ------------------------------- | ------------------------------------------------------------------ |
+| `-c, --correct`                 | Envia les frases correctes a stdout                                |
+| `-f, --flagged`                 | Envia les frases marcades per LanguageTool a stdout                |
+| `-d, --disable-rules RULES`     | Llista de regles addicionals a desactivar (separades per comes)    |
+| `--disable-rules-replace RULES` | Llista de regles a desactivar (substitueix les regles per defecte) |
+| `-h, --help`                    | Mostra el missatge d'ajuda                                         |
+| `-v, --version`                 | Mostra la versió                                                   |
+
+## Regles desactivades per defecte
+
+Per defecte, es desactiven les següents regles de LanguageTool:
+
+- `EXIGEIX_VERBS_CENTRAL`
+- `EXIGEIX_ACCENTUACIO_GENERAL`
+- `EXIGEIX_POSSESSIUS_V`
+- `EVITA_PRONOMS_VALENCIANS`
+- `EVITA_DEMOSTRATIUS_EIXE`
+- `VOCABULARI_VALENCIA`
+- `EXIGEIX_US`
+- `SER_ESSER`
+- `WHITESPACE_RULE`
+- `CA_UNPAIRED_BRACKETS`
+- `ESPAIS_SOBRANTS`
+- `MAJ_DESPRES_INTERROGANT`
+- `UPPERCASE_SENTENCE_START`
 
 ## Compilació (requereix Maven i JDK 17+)
 

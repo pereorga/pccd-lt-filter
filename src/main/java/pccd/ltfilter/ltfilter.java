@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
@@ -15,7 +16,7 @@ import org.languagetool.Languages;
 public class ltfilter {
 
     private static final String DEFAULT_LANGUAGE = "ca";
-    private static final List<String> DISABLED_RULES = Arrays.asList(
+    private static final List<String> DEFAULT_DISABLED_RULES = Arrays.asList(
         "EXIGEIX_VERBS_CENTRAL",
         "EXIGEIX_ACCENTUACIO_GENERAL",
         "EXIGEIX_POSSESSIUS_V",
@@ -36,6 +37,8 @@ public class ltfilter {
     private static boolean optionsProvided = false;
     private static boolean exitAfterParsing = false;
     private static boolean errorInArgs = false;
+    private static List<String> disabledRules = new ArrayList<>();
+    private static boolean appendToDefaultRules = true;
 
     private static String getVersion() {
         String path = "/META-INF/maven/pccd/lt-filter/pom.properties";
@@ -114,6 +117,36 @@ public class ltfilter {
                     System.out.println("lt-filter version " + getVersion());
                     exitAfterParsing = true;
                     return null;
+                case "-d":
+                case "--disable-rules":
+                    if (i + 1 >= args.length) {
+                        System.err.println(
+                            "Error: --disable-rules requires a comma-separated list of rules."
+                        );
+                        errorInArgs = true;
+                        return null;
+                    }
+                    i++;
+                    String[] rules = args[i].split(",");
+                    for (String rule : rules) {
+                        disabledRules.add(rule.trim());
+                    }
+                    break;
+                case "--disable-rules-replace":
+                    if (i + 1 >= args.length) {
+                        System.err.println(
+                            "Error: --disable-rules-replace requires a comma-separated list of rules."
+                        );
+                        errorInArgs = true;
+                        return null;
+                    }
+                    i++;
+                    appendToDefaultRules = false;
+                    String[] replaceRules = args[i].split(",");
+                    for (String rule : replaceRules) {
+                        disabledRules.add(rule.trim());
+                    }
+                    break;
                 default:
                     if (args[i].startsWith("-") && !args[i].equals("-")) {
                         System.err.println("Unknown option: " + args[i]);
@@ -151,10 +184,18 @@ public class ltfilter {
         System.err.println("    -              Explicitly read from standard input (stdin).");
         System.err.println();
         System.err.println("OPTIONS:");
-        System.err.println("    -c, --correct  Output correct sentences to stdout");
-        System.err.println("    -f, --flagged  Output flagged sentences to stdout");
-        System.err.println("    -h, --help     Show this help message");
-        System.err.println("    -v, --version  Show version information");
+        System.err.println("    -c, --correct              Output correct sentences to stdout");
+        System.err.println("    -f, --flagged              Output flagged sentences to stdout");
+        System.err.println(
+            "    -d, --disable-rules RULES  Comma-separated list of additional rules to disable"
+        );
+        System.err.println("                               (appends to default disabled rules)");
+        System.err.println(
+            "    --disable-rules-replace RULES  Comma-separated list of rules to disable"
+        );
+        System.err.println("                               (replaces default disabled rules)");
+        System.err.println("    -h, --help                 Show this help message");
+        System.err.println("    -v, --version              Show version information");
         System.err.println();
         System.err.println("DEFAULT BEHAVIOR:");
         System.err.println("    When no options are specified:");
@@ -166,17 +207,17 @@ public class ltfilter {
         JLanguageTool langTool = new JLanguageTool(
             Languages.getLanguageForShortCode(DEFAULT_LANGUAGE)
         );
-        langTool.disableRules(DISABLED_RULES);
+        langTool.disableRules(getEffectiveDisabledRules());
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String trimmed = line.trim();
-                if (trimmed.isEmpty()) {
+            String line = reader.readLine();
+            while (line != null) {
+                if (line.trim().isEmpty()) {
                     continue;
                 }
-                boolean isCorrect = langTool.check(trimmed).isEmpty();
-                printResult(trimmed, isCorrect);
+                boolean isCorrect = langTool.check(line).isEmpty();
+                printResult(line, isCorrect);
+                line = reader.readLine();
             }
         }
     }
@@ -192,17 +233,17 @@ public class ltfilter {
         JLanguageTool langTool = new JLanguageTool(
             Languages.getLanguageForShortCode(DEFAULT_LANGUAGE)
         );
-        langTool.disableRules(DISABLED_RULES);
+        langTool.disableRules(getEffectiveDisabledRules());
 
         try (BufferedReader reader = new BufferedReader(new FileReader(inputFile))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String trimmed = line.trim();
-                if (trimmed.isEmpty()) {
+            String line = reader.readLine();
+            while (line != null) {
+                if (line.trim().isEmpty()) {
                     continue;
                 }
-                boolean isCorrect = langTool.check(trimmed).isEmpty();
-                printResult(trimmed, isCorrect);
+                boolean isCorrect = langTool.check(line).isEmpty();
+                printResult(line, isCorrect);
+                line = reader.readLine();
             }
         }
     }
@@ -221,5 +262,17 @@ public class ltfilter {
                 System.err.println(line);
             }
         }
+    }
+
+    private static List<String> getEffectiveDisabledRules() {
+        List<String> effectiveRules = new ArrayList<>();
+
+        if (appendToDefaultRules) {
+            effectiveRules.addAll(DEFAULT_DISABLED_RULES);
+        }
+
+        effectiveRules.addAll(disabledRules);
+
+        return effectiveRules;
     }
 }
