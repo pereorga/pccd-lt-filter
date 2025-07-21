@@ -109,3 +109,19 @@ jobs:
           echo "Testing --rule-names via Node.js wrapper"
           node bin/lt-filter.js --flagged --rule-names testdata/flagged.txt > rule-names-node-test.txt
           grep -q "\[.*\]" rule-names-node-test.txt
+
+      - name: Test server functionality
+        run: |
+          echo "Starting server in background..."
+          java -jar bin/lt-filter.jar --port 8080 &
+          SERVER_PID=$!
+          sleep 5 # Wait for server to start
+          echo "Testing server with curl..."
+          RESPONSE=$(curl -s -X POST -d "Això és una prova.
+          A acaba-set" "http://localhost:8080/?rule-names=true")
+          echo "Server response: $RESPONSE"
+          kill $SERVER_PID
+          echo "$RESPONSE" | grep -q '"sentence": "A acaba-set"'
+          echo "$RESPONSE" | grep -q '"rules": \["PREP_VERB_CONJUGAT"\]'
+          echo "$RESPONSE" | grep -q '"correct": \["Això és una prova."\]'
+          echo "Server test passed."
