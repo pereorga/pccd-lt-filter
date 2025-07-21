@@ -10,6 +10,7 @@ jobs:
     name: Test with Java ${{ matrix.java }}
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         java: [17, 21]
 
@@ -43,84 +44,20 @@ jobs:
       - name: Verify JAR was built
         run: ls -la bin/lt-filter.jar
 
-      - name: Run the JAR with sample input
-        run: java -jar bin/lt-filter.jar testdata/input.txt > correct.txt 2> flagged.txt
+      - name: Run basic functionality tests
+        run: cd tests && ./test-basic.sh
 
-      - name: Compare sentences with expected output
-        run: diff correct.txt testdata/correct.txt
+      - name: Run stdin functionality tests
+        run: cd tests && ./test-stdin.sh
 
-      - name: Compare excluded sentences with expected output
-        run: diff flagged.txt testdata/flagged.txt
+      - name: Run Node.js wrapper tests
+        run: cd tests && ./test-node-wrapper.sh
 
-      - name: Run the JAR with separate options
-        run: |
-          java -jar bin/lt-filter.jar --correct testdata/input.txt > correct-option.txt
-          java -jar bin/lt-filter.jar --flagged testdata/input.txt > flagged-option.txt
+      - name: Run disable-rules functionality tests
+        run: cd tests && ./test-disable-rules.sh
 
-      - name: Compare sentences with expected output (options test)
-        run: diff correct-option.txt testdata/correct.txt
+      - name: Run rule-names functionality tests
+        run: cd tests && ./test-rule-names.sh
 
-      - name: Compare excluded sentences with expected output (options test)
-        run: diff flagged-option.txt testdata/flagged.txt
-
-      - name: Run the JAR with sample input (stdin)
-        run: cat testdata/input.txt | java -jar bin/lt-filter.jar > stdin-correct.txt 2> stdin-flagged.txt
-
-      - name: Compare sentences with expected output (stdin)
-        run: diff stdin-correct.txt testdata/correct.txt
-
-      - name: Compare excluded sentences with expected output (stdin)
-        run: diff stdin-flagged.txt testdata/flagged.txt
-
-      - name: Run the JAR with separate options (stdin)
-        run: |
-          cat testdata/input.txt | java -jar bin/lt-filter.jar --correct > stdin-correct-option.txt
-          cat testdata/input.txt | java -jar bin/lt-filter.jar --flagged > stdin-flagged-option.txt
-
-      - name: Compare sentences with expected output (options test, stdin)
-        run: diff stdin-correct-option.txt testdata/correct.txt
-
-      - name: Compare excluded sentences with expected output (options test, stdin)
-        run: diff stdin-flagged-option.txt testdata/flagged.txt
-
-      - name: Run help option via Node.js wrapper
-        run: node bin/lt-filter.js --help
-
-      - name: Run version option via Node.js wrapper
-        run: node bin/lt-filter.js -v
-
-      - name: Test disable-rules functionality
-        run: |
-          echo "Testing --disable-rules (append mode)"
-          java -jar bin/lt-filter.jar --disable-rules COMMA_PARENTHESIS_WHITESPACE testdata/input.txt > disable-rules-test.txt 2>&1
-          diff disable-rules-test.txt testdata/disable-rules-expected.txt
-          echo "Testing --disable-rules-replace (replace mode)"
-          java -jar bin/lt-filter.jar --disable-rules-replace SER_ESSER testdata/input.txt > disable-rules-replace-test.txt 2>&1
-          diff disable-rules-replace-test.txt testdata/disable-rules-replace-expected.txt
-
-      - name: Test rule-names functionality
-        run: |
-          echo "Testing --rule-names with flagged sentences"
-          java -jar bin/lt-filter.jar --flagged --rule-names testdata/flagged.txt > rule-names-test.txt
-          diff rule-names-test.txt testdata/rule-names-expected.txt
-          echo "Testing --rule-names help shows the option"
-          java -jar bin/lt-filter.jar --help | grep -q "rule-names"
-          echo "Testing --rule-names via Node.js wrapper"
-          node bin/lt-filter.js --flagged --rule-names testdata/flagged.txt > rule-names-node-test.txt
-          diff rule-names-node-test.txt testdata/rule-names-expected.txt
-
-      - name: Test server functionality
-        run: |
-          echo "Starting server in background..."
-          java -jar bin/lt-filter.jar --port 8080 &
-          SERVER_PID=$!
-          sleep 5 # Wait for server to start
-          echo "Testing server with curl..."
-          RESPONSE=$(curl -s -X POST -d "Això és una prova.
-          A acaba-set" "http://localhost:8080/?rule-names=true")
-          echo "Server response: $RESPONSE"
-          kill $SERVER_PID
-          echo "$RESPONSE" | grep -q '"sentence": "A acaba-set"'
-          echo "$RESPONSE" | grep -q '"rules": \["PREP_VERB_CONJUGAT"\]'
-          echo "$RESPONSE" | grep -q '"correct": \["Això és una prova."\]'
-          echo "Server test passed."
+      - name: Run server functionality tests
+        run: cd tests && ./test-server.sh
