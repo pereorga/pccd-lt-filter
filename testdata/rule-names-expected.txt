@@ -1,0 +1,2 @@
+A acaba-set [PREP_VERB_CONJUGAT]
+A aferrapilla [MORFOLOGIK_RULE_CA_ES]
