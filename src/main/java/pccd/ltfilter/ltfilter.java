@@ -410,7 +410,7 @@ public class ltfilter {
             try (
                 BufferedReader reader = new BufferedReader(
                     new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8)
-                )
+                );
             ) {
                 body = reader.lines().collect(Collectors.joining("\n"));
             }
