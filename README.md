@@ -23,8 +23,8 @@ npx lt-filter --correct input.txt > correct.txt
 # Només frases potencialment incorrectes
 npx lt-filter --flagged input.txt > flagged.txt
 
-# Inclou els noms de les regles després de les frases marcades
-npx lt-filter --flagged --rule-names input.txt
+# Inclou el nom de la regles
+echo "A acaba-set" | npx lt-filter --flagged --rule-names
 
 # Desactiva regles addicionals (s'afegeixen a les regles per defecte)
 npx lt-filter --disable-rules REGLA1,REGLA2 input.txt
@@ -88,7 +88,7 @@ Podeu passar opcions de la línia d'ordres com a paràmetres de consulta a la UR
 curl -X POST -d "A acaba-set" "http://localhost:8080/?rule-names=true"
 ```
 
-**Resposta JSON amb regles:**
+**Resposta JSON:**
 
 ```json
 {
@@ -114,18 +114,6 @@ curl -X POST -d "A acaba-set" "http://localhost:8080/?rule-names=true"
 | `--disable-rules-replace RULES` | Llista de regles a desactivar (substitueix les regles per defecte) |
 | `-h, --help`                    | Mostra el missatge d'ajuda                                         |
 | `-v, --version`                 | Mostra la versió                                                   |
-
-## Exemple de sortida (CLI) amb noms de regles
-
-Quan s'utilitza l'opció `--rule-names`, els noms de les regles que han detectat errors apareixen entre claudàtors després de la frase:
-
-```bash
-$ echo "A acaba-set" | npx lt-filter --flagged --rule-names
-A acaba-set [PREP_VERB_CONJUGAT]
-
-$ echo "A aferrapilla" | npx lt-filter --flagged --rule-names
-A aferrapilla [MORFOLOGIK_RULE_CA_ES]
-```
 
 ## Regles desactivades per defecte
 
