@@ -229,7 +229,6 @@ public class ltfilter {
         System.err.println(
             "    -d, --disable-rules RULES  Comma-separated list of additional rules to disable"
         );
-        System.err.println("                               (appends to default disabled rules)");
         System.err.println(
             "    --disable-rules-replace RULES  Comma-separated list of rules to disable"
         );
@@ -253,7 +252,7 @@ public class ltfilter {
             "    curl -d \"Text a verificar\" \"http://localhost:8080/?rule-names=true&disable-rules=RULE1\""
         );
         System.err.println(
-            "    The response is a JSON object: {\"correct\":[...],\"flagged\":[...]}"
+            "    The response is a JSON object: { \"correct\": [\"...\"], \"flagged\": [ { \"sentence\": \"...\", \"rules\": [\"...\"] } ] }"
         );
     }
 
