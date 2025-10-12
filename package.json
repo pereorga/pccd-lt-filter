@@ -1,6 +1,6 @@
 {
   "name": "@pccd/lt-filter",
-  "version": "7.0.1",
+  "version": "7.0.2",
   "description": "LanguageTool filter for Catalan text processing",
   "main": "bin/lt-filter.jar",
   "bin": {
