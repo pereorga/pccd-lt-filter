@@ -28,7 +28,7 @@
     "url": "git+https://github.com/pereorga/pccd-lt-filter.git"
   },
   "devDependencies": {
-    "prettier": "3.7.4",
+    "prettier": "3.8.1",
     "prettier-plugin-java": "2.8.1"
   }
 }
