@@ -476,7 +476,9 @@ public class ltfilter {
             sb.append("{\n");
             sb.append("  \"correct\": [\n");
             for (int i = 0; i < correct.size(); i++) {
-                sb.append("    \"").append(escapeJson(correct.get(i))).append("\"");
+                sb.append("    \"")
+                    .append(escapeJson(correct.get(i)))
+                    .append("\"");
                 if (i < correct.size() - 1) {
                     sb.append(",");
                 }
@@ -487,16 +489,14 @@ public class ltfilter {
             for (int i = 0; i < flagged.size(); i++) {
                 FlaggedSentence flaggedSentence = flagged.get(i);
                 sb.append("    {\n");
-                sb
-                    .append("      \"sentence\": \"")
+                sb.append("      \"sentence\": \"")
                     .append(escapeJson(flaggedSentence.sentence))
                     .append("\"");
                 if (outputRuleNames) {
                     sb.append(",\n");
                     sb.append("      \"rules\": [");
                     for (int j = 0; j < flaggedSentence.rules.size(); j++) {
-                        sb
-                            .append("\"")
+                        sb.append("\"")
                             .append(escapeJson(flaggedSentence.rules.get(j)))
                             .append("\"");
                         if (j < flaggedSentence.rules.size() - 1) {
