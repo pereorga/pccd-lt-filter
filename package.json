@@ -12,8 +12,7 @@
   ],
   "scripts": {
     "fix": "prettier --write .",
-    "lint": "prettier --check .",
-    "postinstall": "echo 'lt-filter installed. Requires Java 17+ to run.'"
+    "lint": "prettier --check ."
   },
   "keywords": [
     "languagetool",
